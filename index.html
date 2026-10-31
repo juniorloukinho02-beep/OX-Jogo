@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OX - Jogo da Velha | Thi.AG Studios</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --hover-color: #f0f0f0;
+            --card-bg: #fafafa;
+        }
+
+        .dark-theme {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --border-color: #ffffff;
+            --hover-color: #1e1e1e;
+            --card-bg: #1a1a1a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            letter-spacing: 4px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .studio {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        .controls-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        select, button {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover, select:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            background: var(--card-bg);
+        }
+
+        .score-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-box:not(:last-child) {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .score-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .status {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            min-height: 30px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            aspect-ratio: 1;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 4px;
+        }
+
+        .cell:hover:not(.taken) {
+            background-color: var(--hover-color);
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .actions button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <header>
+        <h1>OX</h1>
+        <div class="studio">Thi.AG Studios & Devs Games</div>
+    </header>
+
+    <div class="container">
+        <div class="controls-panel">
+            <select id="gameMode" onchange="changeGameMode()">
+                <option value="pvp">2 Jogadores (Local)</option>
+                <option value="pve-easy">Contra IA (Fácil)</option>
+                <option value="pve-medium">Contra IA (Médio)</option>
+                <option value="pve-hard">Contra IA (Impossível)</option>
+            </select>
+            <button id="themeToggle" onclick="toggleTheme()">☀️ Claro</button>
+        </div>
+
+        <div class="scoreboard">
+            <div class="score-box">
+                <div class="score-title">Jogador X</div>
+                <div class="score-value" id="scoreX">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-title">Empates</div>
+                <div class="score-value" id="scoreTies">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-title" id="player2Title">Jogador O</div>
+                <div class="score-value" id="scoreO">0</div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Vez do Jogador: X</div>
+
+        <div class="board" id="board">
+            <div class="cell" onclick="makeMove(0)"></div>
+            <div class="cell" onclick="makeMove(1)"></div>
+            <div class="cell" onclick="makeMove(2)"></div>
+            <div class="cell" onclick="makeMove(3)"></div>
+            <div class="cell" onclick="makeMove(4)"></div>
+            <div class="cell" onclick="makeMove(5)"></div>
+            <div class="cell" onclick="makeMove(6)"></div>
+            <div class="cell" onclick="makeMove(7)"></div>
+            <div class="cell" onclick="makeMove(8)"></div>
+        </div>
+
+        <div class="actions">
+            <button onclick="resetBoard()">Reiniciar</button>
+            <button onclick="resetScores()">Zerar Placar</button>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Tiago Júnior - Thi.AG Studios. Todos os direitos reservados.
+    </footer>
+
+    <script>
+        // Registro do Service Worker para suporte Offline
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('App pronto para uso offline!'))
+                    .catch(err => console.log('Erro ao registrar offline:', err));
+            });
+        }
+
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let isGameActive = true;
+        let gameMode = 'pvp';
+        let scores = { X: 0, O: 0, ties: 0 };
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        const statusDisplay = document.getElementById('status');
+        const cells = document.querySelectorAll('.cell');
+
+        function changeGameMode() {
+            gameMode = document.getElementById('gameMode').value;
+            const titleO = document.getElementById('player2Title');
+            titleO.innerText = gameMode.startsWith('pve') ? 'IA (O)' : 'Jogador O';
+            resetBoard();
+            resetScores();
+        }
+
+        function makeMove(index) {
+            if (board[index] !== '' || !isGameActive) return;
+            if (gameMode.startsWith('pve') && currentPlayer === 'O') return;
+
+            board[index] = currentPlayer;
+            cells[index].innerText = currentPlayer;
+            cells[index].classList.add('taken');
+            checkResult();
+        }
+
+        function checkResult() {
+            let roundWon = false;
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (board[a] === '' || board[b] === '' || board[c] === '') continue;
+                if (board[a] === board[b] && board[b] === board[c]) {
+                    roundWon = true;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                statusDisplay.innerText = `Vitória do ${currentPlayer}! 🎉`;
+                scores[currentPlayer]++;
+                updateScoresUI();
+                isGameActive = false;
+                return;
+            }
+
+            if (!board.includes('')) {
+                statusDisplay.innerText = `Empate! 🤝`;
+                scores.ties++;
+                updateScoresUI();
+                isGameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            statusDisplay.innerText = gameMode.startsWith('pve') && currentPlayer === 'O' 
+                ? "IA pensando..." 
+                : `Vez do Jogador: ${currentPlayer}`;
+
+            if (gameMode.startsWith('pve') && currentPlayer === 'O' && isGameActive) {
+                setTimeout(makeAIMove, 400);
+            }
+        }
+
+        function makeAIMove() {
+            if (!isGameActive) return;
+            let move = gameMode === 'pve-easy' ? getRandomMove() : (gameMode === 'pve-medium' ? (Math.random() < 0.5 ? getBestMove() : getRandomMove()) : getBestMove());
+            if (move !== undefined) {
+                board[move] = 'O';
+                cells[move].innerText = 'O';
+                cells[move].classList.add('taken');
+                checkResult();
+            }
+        }
+
+        function getRandomMove() {
+            let emptyCells = [];
+            board.forEach((val, idx) => { if (val === '') emptyCells.push(idx); });
+            if (emptyCells.length === 0) return;
+            return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let bestMove;
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            return bestMove;
+        }
+
+        function minimax(newBoard, depth, isMaximizing) {
+            let result = checkWinState(newBoard);
+            if (result !== null) {
+                if (result === 'O') return 10 - depth;
+                if (result === 'X') return depth - 10;
+                return 0;
+            }
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (newBoard[i] === '') {
+                        newBoard[i] = 'O';
+                        let score = minimax(newBoard, depth + 1, false);
+                        newBoard[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (newBoard[i] === '') {
+                        newBoard[i] = 'X';
+                        let score = minimax(newBoard, depth + 1, true);
+                        newBoard[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinState(b) {
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [x, y, z] = winningConditions[i];
+                if (b[x] && b[x] === b[y] && b[x] === b[z]) return b[x];
+            }
+            if (!b.includes('')) return 'tie';
+            return null;
+        }
+
+        function resetBoard() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            isGameActive = true;
+            currentPlayer = 'X';
+            statusDisplay.innerText = `Vez do Jogador: X`;
+            cells.forEach(cell => {
+                cell.innerText = '';
+                cell.classList.remove('taken');
+            });
+        }
+
+        function updateScoresUI() {
+            document.getElementById('scoreX').innerText = scores.X;
+            document.getElementById('scoreO').innerText = scores.O;
+            document.getElementById('scoreTies').innerText = scores.ties;
+        }
+
+        function resetScores() {
+            scores = { X: 0, O: 0, ties: 0 };
+            updateScoresUI();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggle');
+            body.classList.toggle('dark-theme');
+            btn.innerText = body.classList.contains('dark-theme') ? '☀️ Claro' : '🌙 Escuro';
+        }
+    </script>
+</body>
+</html>
